@@ -1,0 +1,28 @@
+meta:
+  - desc: Basic CBT test using FIO on rbd
+
+tasks:
+  - install:
+  - ceph:
+  - cbt:
+      benchmarks:
+        fio:
+          client_endpoints: "basicclient"
+          op_size: [4096]
+          time: 60
+          mode: ["randwrite"]
+          size: 4096
+          iodepth: [16]
+          pool_profile: "rbd"
+      cluster:
+        user: "ubuntu"
+        osds_per_node: 1
+        iterations: 1
+        pool_profiles:
+          rbd:
+            pg_size: 128
+            pgp_size: 128
+            replications: 2
+        client_endpoints:
+          basicclient:
+            driver: "librbd"
