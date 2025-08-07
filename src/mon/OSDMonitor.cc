@@ -7842,6 +7842,8 @@ int OSDMonitor::prepare_pool_stripe_width(const unsigned pool_type,
             stripe_unit = 4 * 1024;
           }
         }
+      } else {
+        stripe_unit = 4 * 1024;
       }
     
       //Calculate the stripe width
