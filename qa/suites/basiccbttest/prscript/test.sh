@@ -117,58 +117,58 @@ else
 fi
 
 # === STEP 6: Kernel Map and fio ===
-echo "=== STEP 6: Mapping RBD images and running fio ==="
-mkdir -p /tmp/bench_j /tmp/bench_c
+# echo "=== STEP 6: Mapping RBD images and running fio ==="
+# mkdir -p /tmp/bench_j /tmp/bench_c
 
-# Jerasure map and fio
-DEV=$(sudo rbd map ${JERASURE_META_POOL}/${JERASURE_IMG} --device-type krbd)
-if [ $? -ne 0 ]; then
-  echo "Failed to map Jerasure image"
-  exit 1
-fi
-mkfs.ext4 -F $DEV
-mount $DEV /tmp/bench_j
-START_FIO_J=$(date +%s)
-fio --name=jerasure_fio \
-  --filename=/tmp/bench_j/testfile \
-  --rw=write \
-  --bs=1M \
-  --numjobs=1 \
-  --iodepth=4 \
-  --size=2G \
-  --runtime=60 \
-  --time_based \
-  --group_reporting | tee jerasure_fio.log
-END_FIO_J=$(date +%s)
-J_FIO_TIME=$((END_FIO_J - START_FIO_J))
-echo "Jerasure fio time: ${J_FIO_TIME} seconds" | tee -a jerasure_fio.log
-umount /tmp/bench_j
-sudo rbd unmap $DEV || true
+# # Jerasure map and fio
+# DEV=$(sudo rbd map ${JERASURE_META_POOL}/${JERASURE_IMG} --device-type krbd)
+# if [ $? -ne 0 ]; then
+#   echo "Failed to map Jerasure image"
+#   exit 1
+# fi
+# mkfs.ext4 -F $DEV
+# mount $DEV /tmp/bench_j
+# START_FIO_J=$(date +%s)
+# fio --name=jerasure_fio \
+#   --filename=/tmp/bench_j/testfile \
+#   --rw=write \
+#   --bs=1M \
+#   --numjobs=1 \
+#   --iodepth=4 \
+#   --size=2G \
+#   --runtime=60 \
+#   --time_based \
+#   --group_reporting | tee jerasure_fio.log
+# END_FIO_J=$(date +%s)
+# J_FIO_TIME=$((END_FIO_J - START_FIO_J))
+# echo "Jerasure fio time: ${J_FIO_TIME} seconds" | tee -a jerasure_fio.log
+# umount /tmp/bench_j
+# sudo rbd unmap $DEV || true
 
-# clay map and fio
-DEV=$(sudo rbd map ${CLAY_META_POOL}/${CLAY_IMG} --device-type krbd)
-if [ $? -ne 0 ]; then
-  echo "Failed to map CLAY image"
-  exit 1
-fi
-mkfs.ext4 -F $DEV
-mount $DEV /tmp/bench_c
-START_FIO_C=$(date +%s)
-fio --name=clay_fio \
-  --filename=/tmp/bench_c/testfile \
-  --rw=write \
-  --bs=1M \
-  --numjobs=1 \
-  --iodepth=4 \
-  --size=2G \
-  --runtime=60 \
-  --time_based \
-  --group_reporting | tee clay_fio.log
-END_FIO_C=$(date +%s)
-C_FIO_TIME=$((END_FIO_C - START_FIO_C))
-echo "CLAY fio time: ${C_FIO_TIME} seconds" | tee -a clay_fio.log
-umount /tmp/bench_c
-sudo rbd unmap $DEV || true 
+# # clay map and fio
+# DEV=$(sudo rbd map ${CLAY_META_POOL}/${CLAY_IMG} --device-type krbd)
+# if [ $? -ne 0 ]; then
+#   echo "Failed to map CLAY image"
+#   exit 1
+# fi
+# mkfs.ext4 -F $DEV
+# mount $DEV /tmp/bench_c
+# START_FIO_C=$(date +%s)
+# fio --name=clay_fio \
+#   --filename=/tmp/bench_c/testfile \
+#   --rw=write \
+#   --bs=1M \
+#   --numjobs=1 \
+#   --iodepth=4 \
+#   --size=2G \
+#   --runtime=60 \
+#   --time_based \
+#   --group_reporting | tee clay_fio.log
+# END_FIO_C=$(date +%s)
+# C_FIO_TIME=$((END_FIO_C - START_FIO_C))
+# echo "CLAY fio time: ${C_FIO_TIME} seconds" | tee -a clay_fio.log
+# umount /tmp/bench_c
+# sudo rbd unmap $DEV || true 
 
 # === STEP 8: Results Summary ===
 echo ""
