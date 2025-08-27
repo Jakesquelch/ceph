@@ -258,6 +258,14 @@ function TEST_alignment_constraints() {
     # See http://tracker.ceph.com/issues/8622
     #
     local stripe_unit=$(ceph-conf --show-config-value osd_pool_erasure_code_stripe_unit)
+    if [ "$stripe_unit" -eq 0 ]; then
+      local ec_opt=$(ceph-conf --show-config-value osd_pool_default_flag_ec_optimizations)
+      if [ "$ec_opt" = "true" ]; then
+        stripe_unit=$((16 * 1024))
+      else 
+        stripe_unit=$((4 * 1024))
+      fi
+    fi
     eval local $(ceph osd erasure-code-profile get myprofile | grep k=)
     local block_size=$((stripe_unit * k - 1))
     dd if=/dev/zero of=$dir/ORIGINAL bs=$block_size count=2
