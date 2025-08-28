@@ -275,7 +275,16 @@ function TEST_alignment_constraints() {
 }
 
 function chunk_size() {
-    echo $(ceph-conf --show-config-value osd_pool_erasure_code_stripe_unit)
+    local chunk_size=$(ceph-conf --show-config-value osd_pool_erasure_code_stripe_unit)
+    if [ "$chunk_size" -eq 0 ]; then
+      local ec_opt=$(ceph-conf --show-config-value osd_pool_default_flag_ec_optimizations)
+      if [ "$ec_opt" = "true" ]; then
+        chunk_size=$((16 * 1024))
+      else 
+        chunk_size=$((4 * 1024))
+      fi
+    fi
+    echo $chunk_size
 }
 
 #
