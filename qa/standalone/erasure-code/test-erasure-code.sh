@@ -274,6 +274,7 @@ function TEST_alignment_constraints() {
     rm $dir/ORIGINAL
 }
 
+#I should optimise the below as is repeated code
 function chunk_size() {
     local chunk_size=$(ceph-conf --show-config-value osd_pool_erasure_code_stripe_unit)
     if [ "$chunk_size" -eq 0 ]; then
