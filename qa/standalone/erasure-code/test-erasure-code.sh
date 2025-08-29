@@ -342,5 +342,5 @@ function TEST_chunk_mapping() {
 main test-erasure-code "$@"
 
 # Local Variables:
-# compile-command: "cd ../.. ; make -j4 && test/erasure-code/test-erasure-code.sh"
+# compile-command: "cd ../..; make -j4 && test/erasure-code/test-erasure-code.sh"
 # End:
