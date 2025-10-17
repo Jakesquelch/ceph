@@ -304,21 +304,53 @@ int ErasureCodeClay::parse(ErasureCodeProfile &profile,
 int ErasureCodeClay::is_repair(const set<int> &want_to_read,
 			       const set<int> &available_chunks) {
 
+  dout(25) << __func__
+           << " called with want_to_read=" << want_to_read
+           << " available_chunks=" << available_chunks
+           << dendl;
+
   if (includes(available_chunks.begin(), available_chunks.end(),
-               want_to_read.begin(), want_to_read.end())) return 0;
-  if (want_to_read.size() > 1) return 0;
+               want_to_read.begin(), want_to_read.end())) {
+    dout(25) << __func__ << ": all wanted chunks are available "
+                            "-> not a repair" << dendl;
+    return 0;
+  }
+
+  if (want_to_read.size() > 1) {
+    dout(25) << __func__ << ": multiple chunks requested (" << want_to_read.size()
+             << ") -> not a repair" << dendl;    
+    return 0;
+  }
 
   int i = *want_to_read.begin();
   int lost_node_id = (i < k) ? i: i+nu;
+  dout(25) << __func__
+           << ": single lost chunk=" << i
+           << " -> lost_node_id=" << lost_node_id
+           << " (k=" << k << ", nu=" << nu << ", q=" << q << ", d=" << d << ")"
+           << dendl;
+
   for (int x = 0; x < q; x++) {
     int node = (lost_node_id/q)*q+x;
     node = (node < k) ? node : node-nu;
-    if (node != i) { // node in the same group other than erased node
-      if (available_chunks.count(node) == 0) return 0;
+    dout(25) << __func__ << ": checking group node=" << node
+             << " (available=" << (available_chunks.count(node) ? "yes" : "no") << ")"
+             << dendl;
+
+    if (node != i && available_chunks.count(node) == 0) { 
+      // node in the same group other than erased node^
+       dout(25) << __func__ << ": missing group node " << node
+                << " -> cannot repair" << dendl;
+       return 0;
     }
   }
 
-  if (available_chunks.size() < (unsigned)d) return 0;
+  if (available_chunks.size() < (unsigned)d) {
+    dout(25) << __func__ << ": available_chunks.size()=" << available_chunks.size()
+             << " < d=" << d << " -> cannot repair" << dendl;
+    return 0;
+  }
+  dout(25) << __func__ << ": conditions satisfied -> is a repair" << dendl;
   return 1;
 }
 

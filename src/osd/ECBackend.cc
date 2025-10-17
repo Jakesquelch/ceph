@@ -1044,7 +1044,7 @@ void ECBackend::handle_sub_read(
              m += sinfo.get_chunk_size()) {
           for (auto &&k:op.subchunks.find(i->first)->second) {
             bufferlist bl0;
-            dout(20) << __func__ << " JAKE reading subchunk: "
+            dout(25) << __func__ << " JAKE reading subchunk: "
                      << "OFFSET=" << (j->get<0>() + m + (k.first)*subchunk_size)
                      << " LENGTH=" << (k.second)*subchunk_size
                      << dendl;
