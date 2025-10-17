@@ -358,14 +358,32 @@ int ErasureCodeClay::minimum_to_repair(const set<int> &want_to_read,
 				       const set<int> &available_chunks,
 				       map<int, vector<pair<int, int>>> *minimum)
 {
+  dout(25) << __func__
+           << " MIN:called with want_to_read=" << want_to_read
+           << " MIN:available_chunks=" << available_chunks
+           << dendl;
   int i = *want_to_read.begin();
   int lost_node_index = (i < k) ? i : i+nu;
   int rep_node_index = 0;
 
+  dout(25) << __func__
+           << ": lost_node_index=" << lost_node_index
+           << " (from chunk " << i << "), k=" << k
+           << " nu=" << nu
+           << " q=" << q
+           << " d=" << d
+           << dendl;
+
   // add all the nodes in lost node's y column.
   vector<pair<int, int>> sub_chunk_ind;
   get_repair_subchunks(lost_node_index, sub_chunk_ind);
+
+  dout(25) << __func__ << ": subchunks for lost node " << lost_node_index << " -> [";
+  for (auto [a, b] : sub_chunk_ind) dout(25) << "(" << a << "," << b << ") ";
+  dout(25) << "]" << dendl;
+
   if ((available_chunks.size() >= (unsigned)d)) {
+    dout(25) << __func__ << ": building repair set from group nodes" << dendl;
     for (int j = 0; j < q; j++) {
       if (j != lost_node_index%q) {
         rep_node_index = (lost_node_index/q)*q+j;
@@ -376,18 +394,38 @@ int ErasureCodeClay::minimum_to_repair(const set<int> &want_to_read,
         }
       }
     }
+
     for (auto chunk : available_chunks) {
       if (minimum->size() >= (unsigned)d) {
 	break;
       }
       if (!minimum->count(chunk)) {
+        dout(25) << __func__ << ": adding extra chunk " << chunk
+                 << " to reach d=" << d
+                 << dendl;
 	minimum->emplace(chunk, sub_chunk_ind);
       }
     }
   } else {
-    dout(0) << "minimum_to_repair: shouldn't have come here" << dendl;
+    dout(25) << __func__
+             << ": shouldn't have come here — available_chunks.size()="
+             << available_chunks.size() << " < d=" << d
+             << dendl;
     ceph_assert(0);
   }
+
+  dout(25) << __func__
+           << ": built minimum map of size=" << minimum->size()
+           << " (expected " << d << ")"
+           << dendl;
+
+  for (auto &[node, subs] : *minimum) {
+    dout(25) << __func__ << ": node=" << node << " -> subchunks: ";
+    for (auto [a, b] : subs)
+      dout(25) << "(" << a << "," << b << ") ";
+    dout(25) << dendl;
+  }
+
   ceph_assert(minimum->size() == (unsigned)d);
   return 0;
 }
