@@ -1029,6 +1029,11 @@ void ECBackend::handle_sub_read(
           (op.subchunks.find(i->first)->second.front().second == 
                                             ec_impl->get_sub_chunk_count())) {
         dout(25) << __func__ << " case1: reading the complete chunk/shard." << dendl;
+        dout(25) << __func__ << " case1 debug: "
+                 << "sub_chunk_count=" << ec_impl->get_sub_chunk_count()
+                 << ", chunk_size=" << sinfo.get_chunk_size()
+                 << ", object=" << i->first
+                 << dendl;
         r = store->read(
 	  ch,
 	  ghobject_t(i->first, ghobject_t::NO_GEN, shard),
@@ -1039,11 +1044,21 @@ void ECBackend::handle_sub_read(
         dout(25) << __func__ << " case2: going to do fragmented read." << dendl;
         int subchunk_size =
           sinfo.get_chunk_size() / ec_impl->get_sub_chunk_count();
+        dout(25) << __func__ << " case2 debug: "
+                 << "chunk_size=" << sinfo.get_chunk_size()
+                 << ", sub_chunk_count=" << ec_impl->get_sub_chunk_count()
+                 << ", subchunk_size=" << subchunk_size
+                 << ", object=" << i->first
+                 << dendl;
         bool error = false;
         for (int m = 0; m < (int)j->get<1>() && !error;
              m += sinfo.get_chunk_size()) {
           for (auto &&k:op.subchunks.find(i->first)->second) {
             bufferlist bl0;
+            dout(25) << __func__ << " JAKE reading subchunk: "
+                     << "OFFSET=" << (j->get<0>() + m + (k.first)*subchunk_size)
+                     << " LENGTH=" << (k.second)*subchunk_size
+                     << dendl;
             r = store->read(
                 ch,
                 ghobject_t(i->first, ghobject_t::NO_GEN, shard),
