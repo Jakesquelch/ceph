@@ -1039,6 +1039,9 @@ void ECBackend::handle_sub_read(
         dout(25) << __func__ << " case2: going to do fragmented read." << dendl;
         int subchunk_size =
           sinfo.get_chunk_size() / ec_impl->get_sub_chunk_count();
+          dout(25) << __func__ << " subchunk_size=" << subchunk_size
+           << " bytes, chunk_size=" << sinfo.get_chunk_size()
+           << " bytes" << dendl;
         bool error = false;
         for (int m = 0; m < (int)j->get<1>() && !error;
              m += sinfo.get_chunk_size()) {
