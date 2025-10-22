@@ -614,6 +614,18 @@ void ECBackend::RecoveryBackend::continue_recovery_op(
 	from,
 	amount);
       dout(25) << __func__ << "JAKES: IDLE return " << op << dendl;
+      dout(25) << __func__ << "JAKES: starting read for " << op.hoid
+               << " from offset=" << from
+               << " amount=" << amount
+               << " data_recovered_to=" << op.recovery_progress.data_recovered_to
+               << " complete=" << op.recovery_progress.data_complete
+               << dendl;
+      dout(25) << __func__ << "JAKES: want shards=" << want
+               << " to_read size=" << to_read.size() << dendl;
+      for (auto &[shard, ranges] : to_read) {
+          dout(25) << __func__ << "JAKES: reading from shard " << shard
+                  << " ranges=" << ranges << dendl;
+      }
       return;
     }
     case RecoveryOp::READING: {
