@@ -556,7 +556,7 @@ void ECBackend::RecoveryBackend::continue_recovery_op(
   RecoveryBackend::RecoveryOp &op,
   RecoveryMessages *m)
 {
-  dout(10) << __func__ << ": continuing " << op << dendl;
+  dout(25) << __func__ << "JAKES: continuing " << op << dendl;
   using RecoveryOp = RecoveryBackend::RecoveryOp;
   while (1) {
     switch (op.state) {
@@ -596,7 +596,7 @@ void ECBackend::RecoveryBackend::continue_recovery_op(
       if (r != 0) {
 	// we must have lost a recovery source
 	ceph_assert(!op.recovery_progress.first);
-	dout(10) << __func__ << ": canceling recovery op for obj " << op.hoid
+	dout(25) << __func__ << "JAKES: canceling recovery op for obj " << op.hoid
 		 << dendl;
 	// in crimson
 	get_parent()->cancel_pull(op.hoid);
@@ -613,7 +613,7 @@ void ECBackend::RecoveryBackend::continue_recovery_op(
       op.extent_requested = make_pair(
 	from,
 	amount);
-      dout(10) << __func__ << ": IDLE return " << op << dendl;
+      dout(25) << __func__ << "JAKES: IDLE return " << op << dendl;
       return;
     }
     case RecoveryOp::READING: {
@@ -639,7 +639,7 @@ void ECBackend::RecoveryBackend::continue_recovery_op(
 	pop.soid = op.hoid;
 	pop.version = op.v;
 	pop.data = op.returned_data[mi->shard];
-	dout(10) << __func__ << ": before_progress=" << op.recovery_progress
+	dout(25) << __func__ << "JAKES: before_progress=" << op.recovery_progress
 		 << ", after_progress=" << after_progress
 		 << ", pop.data.length()=" << pop.data.length()
 		 << ", size=" << op.obc->obs.oi.size << dendl;
@@ -670,7 +670,7 @@ void ECBackend::RecoveryBackend::continue_recovery_op(
       op.returned_data.clear();
       op.waiting_on_pushes = op.missing_on;
       op.recovery_progress = after_progress;
-      dout(10) << __func__ << ": READING return " << op << dendl;
+      dout(25) << __func__ << "JAKES: READING return " << op << dendl;
       return;
     }
     case RecoveryOp::WRITING: {
@@ -681,7 +681,7 @@ void ECBackend::RecoveryBackend::continue_recovery_op(
 	       i != op.missing_on.end();
 	       ++i) {
 	    if (*i != get_parent()->primary_shard()) {
-	      dout(10) << __func__ << ": on_peer_recover on " << *i
+	      dout(25) << __func__ << "JAKES: on_peer_recover on " << *i
 		       << ", obj " << op.hoid << dendl;
 	      get_parent()->on_peer_recover(
 		*i,
@@ -698,12 +698,12 @@ void ECBackend::RecoveryBackend::continue_recovery_op(
 	    stat.num_objects_repaired = 1;
 	  // pg_recovery.cc in crimson has it
 	  get_parent()->on_global_recover(op.hoid, stat, false);
-	  dout(10) << __func__ << ": WRITING return " << op << dendl;
+	  dout(25) << __func__ << "JAKES: WRITING return " << op << dendl;
 	  recovery_ops.erase(op.hoid);
 	  return;
 	} else {
 	  op.state = RecoveryOp::IDLE;
-	  dout(10) << __func__ << ": WRITING continue " << op << dendl;
+	  dout(25) << __func__ << "JAKES: WRITING continue " << op << dendl;
 	  continue;
 	}
       }
